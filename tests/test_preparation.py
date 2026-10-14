@@ -60,3 +60,16 @@ def test_config_paths_stay_with_checkout_when_working_directory_changes(tmp_path
     loaded = load_config(config)
     assert loaded.manifest == str(root / "data/input.json")
     assert loaded.output == str(root / "runs/check")
+
+
+def test_manifest_rejects_same_inode_under_different_names(tmp_path):
+    import os
+    from damldg.preparation import check_records
+    first = tmp_path / "first.wav"
+    first.write_bytes(b"fixture")
+    second = tmp_path / "second.wav"
+    os.link(first, second)
+    rows = [{"id": "a", "path": str(first), "label": 0, "split": "train"},
+            {"id": "b", "path": str(second), "label": 1, "split": "test"}]
+    with pytest.raises(ValueError, match="Duplicate|leakage"):
+        check_records(rows, ["a", "b"], ["train", "test"])

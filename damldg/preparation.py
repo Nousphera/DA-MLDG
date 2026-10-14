@@ -36,6 +36,7 @@ def check_records(records, classes, splits, root=None, decode=None, verify_hashe
     if not records or len(classes) < 2 or len(set(classes)) != len(classes):
         raise ValueError("Expected nonempty records and distinct classes")
     ids, paths = set(), set()
+    file_ids = set()
     output = []
     for record in records:
         row = dict(record)
@@ -55,9 +56,11 @@ def check_records(records, classes, splits, root=None, decode=None, verify_hashe
             raise ValueError("Audio path escapes corpus root")
         if not path.is_file():
             raise FileNotFoundError(path)
-        if path in paths:
+        identity = (path.stat().st_dev, path.stat().st_ino)
+        if path in paths or identity in file_ids:
             raise ValueError("Duplicate file or split leakage")
         paths.add(path)
+        file_ids.add(identity)
         if decode is not None:
             decode(path)
             current = checksum(path)
