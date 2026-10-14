@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "Please cite the associated research paper."
+title: "On efficacy of Meta-Learning for Domain Generalization in Speech Emotion Recognition"
+type: article
+authors:
+  - name: "Raeshak King Gandhi"
+  - name: "Vasileios Tsouvalas"
+  - name: "Nirvana Meratnia"
+url: https://ieeexplore.ieee.org/document/10150265/
