@@ -51,7 +51,14 @@ class Config:
 
 
 def load_config(path, **overrides):
-    data = json.loads(Path(path).read_text())
+    config_path = Path(path).resolve()
+    data = json.loads(config_path.read_text())
+    # Shipped configs live under configs/; keep their data paths tied to the
+    # checkout even when Flower executes a bundled app from a different cwd.
+    base = config_path.parent.parent if config_path.parent.name == "configs" else config_path.parent
+    for key in ("manifest", "pretrained_encoder", "output"):
+        if data.get(key) and not Path(data[key]).is_absolute():
+            data[key] = str((base / data[key]).resolve())
     data.update({k: v for k, v in overrides.items() if v is not None})
     return Config(**data)
 
@@ -78,7 +85,9 @@ def make_data(config):
         classes = EMOTIONS
     else:
         manifest = json.loads(Path(config.manifest).read_text())
+        from .preparation import check_records
         rows = manifest["records"]
+        check_records(rows, manifest["classes"], ("source",) if config.representation == "spectrogram" else ("source", "target"))
         classes = manifest["classes"]
         if manifest["representation"] != config.representation:
             raise ValueError("Manifest/config representation mismatch")

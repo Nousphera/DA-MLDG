@@ -39,6 +39,8 @@ def index_folders(root, sources, target, classes, extensions):
                 if path.suffix.lower() not in extensions:
                     continue
                 resolved = path.resolve()
+                if not path.is_file() or not resolved.is_relative_to(root):
+                    raise ValueError("Dataset files must stay inside the corpus root")
                 if resolved in seen:
                     raise ValueError("Duplicate source/target path")
                 seen.add(resolved)
