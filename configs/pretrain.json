@@ -1,0 +1,12 @@
+{
+  "dataset": "manifest",
+  "manifest": "data/voxceleb.json",
+  "representation": "spectrogram",
+  "method": "deepall",
+  "epochs": 50,
+  "batch_size": 64,
+  "learning_rate": 0.01,
+  "momentum": 0.9,
+  "augment": false,
+  "output": "runs/voxceleb-pretrain"
+}
