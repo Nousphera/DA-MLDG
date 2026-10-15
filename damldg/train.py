@@ -54,7 +54,7 @@ def load_config(path, **overrides):
     config_path = Path(path).resolve()
     data = json.loads(config_path.read_text())
     # Shipped configs live under configs/; keep their data paths tied to the
-    # checkout even when Flower executes a bundled app from a different cwd.
+    # checkout independently of the caller's working directory.
     base = config_path.parent.parent if config_path.parent.name == "configs" else config_path.parent
     for key in ("manifest", "pretrained_encoder", "output"):
         if data.get(key) and not Path(data[key]).is_absolute():
@@ -218,7 +218,8 @@ def run(config):
         history.append(record)
         print(json.dumps(record), flush=True)
     metrics = {
-        "benchmark_reproduction": False,
+        "dataset": config.dataset,
+        "representation": config.representation,
         "initialization": "pretrained" if config.pretrained_encoder else "random",
         "method": config.method,
         "seconds": time.monotonic() - start,

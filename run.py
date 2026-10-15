@@ -1,4 +1,4 @@
-"""Convenience entry point for the maintained package; defaults to bounded smoke."""
+"""Convenience training entry point; defaults to a small generated-data run."""
 
 import sys
 from damldg.cli import main

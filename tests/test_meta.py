@@ -194,6 +194,8 @@ def test_real_wav_pipeline_and_strict_encoder_transfer(tmp_path):
         output=str(tmp_path / "run"),
     )
     result = run(config)
+    assert result["dataset"] == config.dataset
+    assert result["representation"] == config.representation
     assert result["target"]["num_examples"] == 2 and np.isfinite(
         result["target"]["loss"]
     )

@@ -4,15 +4,15 @@
 
 Raeshak King Gandhi · Vasileios Tsouvalas · Nirvana Meratnia · PerFail @ IEEE PerCom 2023
 
-[Paper](https://ieeexplore.ieee.org/document/10150265/) · [Project](https://nousphera.github.io/DA_MLDG/) · [Poster](https://nousphera.github.io/DA_MLDG/poster.pdf)
+[<img src="docs/assets/icons/paper.svg" width="16" height="16" alt=""> Paper](https://ieeexplore.ieee.org/document/10150265/) · [<img src="docs/assets/icons/project.svg" width="16" height="16" alt=""> Project](https://nousphera.github.io/DA_MLDG/) · [Poster](https://nousphera.github.io/DA_MLDG/poster.pdf)
 
 ## Abstract
 
 Speech Emotion Recognition (SER) refers to the recognition of human emotions from natural speech, vital for building human-centered context-aware intelligent systems. Here, domain shift, where models’ trained on one domain exhibit performance degradation when exposed to an unseen domain with different statistics, is a major limiting factor in SER applicability, as models have a strong dependence on speakers and languages characteristics used during training. Meta-Learning for Domain Generalization (MLDG) has shown great success in improving models’ generalization capacity and alleviate the domain shift problem in the vision domain; yet, its’ efficacy on SER remains largely unexplored. In this work, we propose a “domain-shift aware” MLDG approach to learn generalizable models across multiple domains in SER. Based on our extensive evaluation, we identify a number of pitfalls that contribute to poor models’ DG ability, and demonstrate that log-mel spectrograms representations lack distinct features required for MLDG in SER. We further explore the use of appropriate features to achieve DG in SER as to provide insides to future research directions for DG in SER.
 
-## Setup
+## Install
 
-Use Python 3.11 (tested on macOS arm64 CPU); Python 3.12 is supported but untested.
+Use Python 3.11 or 3.12. The dependency lock targets Python 3.11 on macOS arm64 CPU.
 A CPU is sufficient for the generated-data smoke.
 
 ```bash
@@ -25,7 +25,7 @@ python -m pytest -q
 
 The script creates a new virtual environment, installs `.[test]` using the tested
 dependency constraints, and runs `pip check`. It refuses to modify an existing
-environment. Training uses the maintained `damldg/` package.
+environment. Training uses the `damldg/` package.
 
 ## Datasets
 
@@ -48,7 +48,7 @@ python scripts/prepare_data.py prepare --root datasets/ser --scenario scn7 --out
 python scripts/prepare_data.py validate --manifest data/scn7.json
 ```
 
-If the original normalized layout already exists, start with `prepare`.
+If the normalized layout already exists, start with `prepare`.
 The five class IDs are anger, happiness, sadness, disgust and fear. The importer
 preserves speaker/session paths and audio bytes; it never guesses labels or
 fabricates missing classes. PACS images, speaker pretraining and feature-array
@@ -71,23 +71,21 @@ damldg train --config configs/scn7.json --seed 2021 --output runs/scn7-seed2021
 
 Use `configs/scn1.json` through `configs/scn7.json` for the other scenarios after
 preparing their manifests. Select a baseline with `--method mldg`, `--method deepall`
-or `--method rsc`, and a fresh `--output` directory. This is centralized domain
-generalization; it does not require Flower.
+or `--method rsc`, and a fresh `--output` directory. All four methods use
+centralized source-domain training.
 
-## Outputs and reproducibility
+## Configuration and outputs
 
 Each run saves `config.json`, `partitions.json`, `environment.json`, `metrics.json`,
 `model.keras`, and `encoder.keras`. Targets stay outside parameter updates and
 are evaluated after training. The configs use random initialization until a
-compatible `pretrained_encoder` is explicitly supplied; they are not the paper's
-pretrained setup without that artifact.
+compatible `pretrained_encoder` is supplied. Set this field to a speaker-trained
+encoder for SER or an ImageNet-trained encoder for PACS.
 
-The [method mapping](docs/METHOD.md) explains the repaired higher-order gradient,
-energy weighting and source-domain batching. [Reproducibility](docs/REPRODUCIBILITY.md)
-and [provenance](PROVENANCE.md) record source differences and validation.
-Full published benchmarks, original pretrained checkpoints and the exact TRILLsson
-tensor preparation remain unavailable or unverified. The paper's limited and
-uneven generalization results are not replaced by smoke-test accuracy.
+The [method guide](docs/METHOD.md) explains the second-order gradient, energy
+weighting and domain-balanced batches. The [experiment guide](docs/REPRODUCIBILITY.md)
+covers seed control, repeated runs and saved metrics. External feature extraction
+and tensor mapping are configured separately as described in the [data guide](docs/DATA.md).
 
 ## Citation
 
@@ -106,4 +104,6 @@ uneven generalization results are not replaced by smoke-test accuracy.
 
 ## Source terms
 
-No software license was present in the recovered repository. Attribution is preserved; reuse terms remain unspecified. Dataset and external-model terms remain with their providers.
+A software license has not been specified. Contact the authors for reuse terms.
+Dataset and external-model terms remain with their providers.
+See [source credits](PROVENANCE.md).

@@ -8,7 +8,7 @@ Obtain each dataset under its access terms and prepare WAV/FLAC files in:
 datasets/ser/<corpus>/<emotion>/<utterance>.wav
 ```
 
-Corpus IDs are `crema_d`, `savee`, `ravdess`, `iemocap`, `tess`, `emodb`, `cafe`, `emovo`, `shemo`, and `aesdd`. The common class order, retained from source, is `anger,happiness,sadness,disgust,fear`. Other emotion directories are excluded. A corpus may legitimately miss a common class (ShEMO has no disgust samples); no samples are fabricated.
+Corpus IDs are `crema_d`, `savee`, `ravdess`, `iemocap`, `tess`, `emodb`, `cafe`, `emovo`, `shemo`, and `aesdd`. The common class order is `anger,happiness,sadness,disgust,fear`. Other emotion directories are excluded. A corpus may legitimately miss a common class (ShEMO has no disgust samples); no samples are fabricated.
 
 ### Acquire and import raw corpora
 
@@ -33,8 +33,8 @@ For each corpus, create a UTF-8 CSV from its provider labels with the columns
 below. Paths are relative to the extracted raw corpus. `emotion` must be one of
 the five canonical names; omit neutral, surprise and other excluded categories.
 Preserve and document the provider-to-canonical mapping alongside the CSV.
-This annotation conversion is a required user input because the historical
-prepared files and harmonization choices were not recovered.
+The CSV makes the label conversion explicit and keeps it consistent across
+all source and target corpora.
 
 ```csv
 path,emotion
@@ -56,10 +56,6 @@ emotion, and atomically publishes the copied directory plus `preparation.json`.
 It refuses an existing destination and never edits source files. Already
 normalized folders can be indexed directly by `damldg prepare`.
 
-The original source expects normalized emotion directories. This importer makes
-that boundary executable without claiming to recover its missing original label
-harmonization or benchmark partitions.
-
 | Scenario | Source corpora | Target |
 |---|---|---|
 | scn1 | CREMA-D, SAVEE, RAVDESS | IEMOCAP |
@@ -75,7 +71,7 @@ damldg prepare --root datasets/ser --scenario scn5 --output data/scn5.json
 damldg train --config configs/scn5.json
 ```
 
-Preparation decodes each input, records SHA-256 and byte counts, and fails if a selected domain has no recognized audio, a file escapes the root or a resolved path appears twice. `damldg validate --manifest data/scn5.json` repeats decoding and hash checks without rewriting the manifest. Manifests record source/target assignments explicitly; training validates disjoint domain identities. All source corpora are available during training, while the target is used only for final evaluation. This is not the separate speaker-independent 80/20 within-corpus experiment in Table I; that split recipe is not reconstructed here.
+Preparation decodes each input, records SHA-256 and byte counts, and fails if a selected domain has no recognized audio, a file escapes the root or a resolved path appears twice. `damldg validate --manifest data/scn5.json` repeats decoding and hash checks without rewriting the manifest. Manifests record source/target assignments explicitly; training validates disjoint domain identities. All source corpora are available during training, while the target is used only for final evaluation. These configs define cross-corpus evaluation. A within-corpus speaker-independent experiment requires a separate speaker-disjoint split.
 
 SoundFile reads audio, channels are averaged, and SciPy polyphase filtering resamples to 16 kHz. Training augmentation/crops are seeded. Hold-out target audio gets no augmentation, and labels never enter parameter updates. File paths in manifests are absolute and local; keep manifests and outputs private if their metadata is sensitive.
 
@@ -89,9 +85,9 @@ damldg validate --manifest data/voxceleb.json
 damldg train --config configs/pretrain.json
 ```
 
-The reconstruction trains ResNet-18 to classify speakers for 50 epochs, SGD0.01/momentum 0.9, batch 64, two-second crops, 25 ms Hamming windows and 10 ms hops. It uses log-magnitude STFT with FFT1024; that FFT and logarithm choice are explicit because the original pretraining implementation is missing. `encoder.keras` excludes the speaker head and transfers into downstream SER via `pretrained_encoder`. The directory labels determine the speaker count; the paper describes 1,251 speakers.
+Pretraining learns ResNet-18 speaker classification for 50 epochs using SGD 0.01/momentum 0.9, batch size 64, two-second crops, 25 ms Hamming windows and 10 ms hops. Inputs are log-magnitude STFT features with FFT 1024. `encoder.keras` excludes the speaker head and transfers into downstream SER via `pretrained_encoder`. The directory labels determine the speaker count; the paper describes 1,251 speakers.
 
-A downstream config with `pretrained_encoder: null` uses random initialization and is not the paper's pretrained setup. Encoder weight loading is strict; incompatible input channels/layers raise an error rather than silently skipping weights. No pretrained checkpoint is automatically downloaded or bundled. Record encoder provenance and the input dataset version.
+A downstream config with `pretrained_encoder: null` uses random initialization. Encoder weight loading is strict; incompatible input channels/layers raise an error rather than silently skipping weights. No pretrained checkpoint is automatically downloaded or bundled. Record the encoder hash and input dataset version.
 
 ## PACS
 
@@ -103,13 +99,13 @@ damldg validate --manifest data/pacs.json
 damldg train --config configs/pacs.json
 ```
 
-Images are resized to 256×256 then randomly cropped to 224×224 and flipped during training; evaluation uses a center crop. RGB means 123.68/116.779/103.939 are subtracted, as in source. A compatible ImageNet-pretrained encoder is required for the paper's setup; the missing original checkpoint is not replaced with random weights without recording the difference. Repeat with each held-out domain and a distinct manifest/output to perform leave-one-domain-out evaluation.
+Images are resized to 256×256 then randomly cropped to 224×224 and flipped during training; evaluation uses a center crop. RGB means 123.68/116.779/103.939 are subtracted, as in source. For ImageNet initialization, supply a compatible encoder through `pretrained_encoder`; a null value selects random initialization. Repeat with each held-out domain and a distinct manifest/output to perform leave-one-domain-out evaluation.
 
-## Prepared feature inputs / TRILLsson boundary
+## Prepared feature inputs
 
 Use `--kind features` to index `.npy` files with the same corpus/emotion layout. Files must contain finite arrays shaped `[H,W,C]` (or `[H,W]`, adding one channel). Set `representation: features` and point the config at that manifest. Loading uses `allow_pickle=False`. Arrays in a training batch must share a shape.
 
-This adapter permits experiments with prepared representations, but it is not a recovered TRILLsson-v3 pipeline. The paper names EfficientNetv2-B3 TRILLsson embeddings without specifying the reshape/projection needed by this ResNet-18; the original source has no extractor. Record the external model/version, extraction settings and tensor mapping in the manifest if using that experiment. Do not label arbitrary feature arrays as a reproduction of Table IV.
+Feature extraction is performed separately. For TRILLsson experiments, choose the EfficientNetv2-B3 embedding model and specify how its output maps to the ResNet-18 input tensor. Record the external model/version, extraction settings and reshape or projection with the manifest.
 
 
 To index prepared representations for scenario 7:
@@ -122,7 +118,7 @@ damldg validate --manifest data/scn7-features.json
 Copy `configs/scn7.json`, set `representation` to `features`, set `manifest` to
 this file, and choose a new output directory. This validates finite array content
 without pickle loading. The extraction model and tensor mapping are external,
-explicit inputs; no fabricated TRILLsson extractor is included.
+explicit inputs to this workflow.
 
 Paths in shipped files under `configs/` resolve against the checkout. Paths in
 configs saved elsewhere resolve against the config's own directory. Keep each

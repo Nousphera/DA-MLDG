@@ -1,3 +1,7 @@
-# Pre-trained Weights
+# Pretrained encoders
 
-Pre-train your model in [VoxCeleb](https://www.robots.ox.ac.uk/~vgg/data/voxceleb/) and store your weights in this directory. More details regarding our pre-trained strategy can be found in our [report](../../../report.pdf).
+Use the [speaker pretraining recipe](../../../docs/DATA.md#speaker-pretraining-and-encoder-transfer)
+to train on an acquired [VoxCeleb corpus](https://www.robots.ox.ac.uk/~vgg/data/voxceleb/).
+The trainer writes `encoder.keras` in the run output directory. Set
+`pretrained_encoder` in a downstream configuration to that file.
+The [paper](../../../report.pdf) describes the experimental setup.
