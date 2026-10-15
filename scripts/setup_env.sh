@@ -14,6 +14,6 @@ if [[ "$env_path" == *" "* ]]; then
 fi
 "$python_bin" -m venv "$env_path"
 "$env_path/bin/python" -m pip install --upgrade pip
-"$env_path/bin/python" -m pip install -e '.[test]' -c requirements-lock-py311.txt
+"$env_path/bin/python" -m pip install -r requirements.txt
 "$env_path/bin/python" -m pip check
 printf 'Activate with: source "%s/bin/activate"\n' "$env_path"

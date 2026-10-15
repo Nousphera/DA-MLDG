@@ -17,7 +17,7 @@ Speech Emotion Recognition (SER) refers to the recognition of human emotions fro
 
 ## Requirements and installation
 
-Use Python 3.11 or 3.12. The dependency lock targets Python 3.11 on macOS arm64 CPU.
+Use Python 3.11 or 3.12 in a dedicated virtual environment.
 A CPU is sufficient for the generated-data smoke.
 
 ```bash
@@ -28,8 +28,7 @@ source "$HOME/.venvs/damldg/bin/activate"
 python -m pytest -q
 ```
 
-The script creates a new virtual environment, installs `.[test]` using the tested
-dependency constraints, and runs `pip check`. It refuses to modify an existing
+The script creates a new virtual environment, installs the package and tests from `requirements.txt`, and runs `pip check`. It refuses to modify an existing
 environment. Training uses the `damldg/` package.
 
 ## Data preparation
