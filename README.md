@@ -149,10 +149,9 @@ are evaluated after training. The configs use random initialization until a
 compatible `pretrained_encoder` is supplied. Set this field to a speaker-trained
 encoder for SER or an ImageNet-trained encoder for PACS.
 
-The [method guide](docs/METHOD.md) explains the second-order gradient, energy
-weighting and domain-balanced batches. The [experiment guide](docs/REPRODUCIBILITY.md)
-covers seed control, repeated runs and saved metrics. External feature extraction
-and tensor mapping are configured separately as described in the [data guide](docs/DATA.md).
+The [method and configuration guide](docs/METHOD.md) covers the objective,
+batching, repeated runs and saved metrics. Feature extraction and tensor mapping
+are described in the [data guide](docs/DATA.md).
 
 ## Citation
 
@@ -173,4 +172,3 @@ and tensor mapping are configured separately as described in the [data guide](do
 
 A software license has not been specified. Contact the authors for reuse terms.
 Dataset and external-model terms remain with their providers.
-See [source credits](PROVENANCE.md).
