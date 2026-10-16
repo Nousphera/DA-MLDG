@@ -1,2 +1,1 @@
-# Runtime and tests; version compatibility is declared in pyproject.toml.
--e .[test]
+-e .
